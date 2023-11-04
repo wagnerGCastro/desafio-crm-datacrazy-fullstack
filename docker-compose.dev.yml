@@ -1,0 +1,68 @@
+version: "3.9"
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+services:
+  ### BACKEND ##############################################
+  backend:
+    build:
+      context: ./backend/.docker/bin/backend
+      dockerfile: Dockerfile
+    entrypoint: sh -c "npm install --loglevel=error && npm run start:dev"
+    env_file:
+      - ./backend/src/config/envs/.env.development
+    volumes:
+      - ./backend:/var/www
+    ports:
+      - "${APP_PORT:-3071}:3071"
+    depends_on:
+      - postgres
+      - pgadmin
+    networks:
+      - backend
+      - frontend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  ### POSTGRES ##############################################
+  postgres:
+    image: postgres:10.5
+    env_file:
+      - ./backend/src/config/envs/.env.development
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: postgres
+    restart: unless-stopped
+    volumes:
+      - ./backend/.docker/data/postgres/data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5434}:5432"
+    networks:
+      - backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  ### PGADMIN ##############################################
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "${PGADMIN_PORT:-8086}:80"
+    env_file:
+      - ./backend/src/config/envs/.env.development
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com.br}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend/.docker/data/pgadmin/data/:/var/lib/pgadmin/
+    networks:
+      - backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
