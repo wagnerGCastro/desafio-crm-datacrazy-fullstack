@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Patch, UseGuards } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,7 +20,7 @@ export class UserController {
 
   @Get(':id')
   async show(@Param('id') id: number) {
-    return this.userService.findOneOrFail(+id);
+    return await this.userService.findOneOrFail({ id });
   }
 
   @Patch(':id')
