@@ -114,7 +114,7 @@ describe('UserController', () => {
 
       expect(result).toEqual(userEntityList[0]);
       expect(userService.findOneOrFail).toBeCalledTimes(1);
-      expect(userService.findOneOrFail).toBeCalledWith(1);
+      expect(userService.findOneOrFail).toBeCalledWith({ id: 1 });
     });
 
     it('should throw an exception', async () => {
