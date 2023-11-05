@@ -85,7 +85,7 @@ describe('UserService', () => {
 
   describe('findOneOrFail', () => {
     it('should return a user entity item successfully', async () => {
-      const result = await userService.findOneOrFail(1);
+      const result = await userService.findOneOrFail({ id: 1 });
 
       expect(result).toEqual(userEntityList[0]);
       expect(userRepository.findOneOrFail).toHaveBeenCalledTimes(1);
@@ -94,7 +94,7 @@ describe('UserService', () => {
     it('should throw a not found exception', () => {
       jest.spyOn(userRepository, 'findOneOrFail').mockRejectedValueOnce(new Error());
 
-      expect(userService.findOneOrFail(1)).rejects.toThrowError(NotFoundException);
+      expect(userService.findOneOrFail({ id: 1 })).rejects.toThrowError(NotFoundException);
     });
   });
 
