@@ -46,4 +46,16 @@ export class UserEntity {
   hashPassword() {
     this.password = hashSync(this.password, 10);
   }
+
+  constructor(todo?: Partial<UserEntity>) {
+    this.id = todo?.id;
+    this.firstName = todo?.firstName;
+    this.lastName = todo?.lastName;
+    this.email = todo?.email;
+    this.password = todo?.password;
+    this.role = todo?.role;
+    this.createdAt = todo?.createdAt;
+    this.updatedAt = todo?.updatedAt;
+    this.deletedAt = todo?.deletedAt;
+  }
 }

@@ -12,7 +12,7 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  async findOne(id: number) {
+  async findOneOrFail(id: number) {
     return `This action returns a #${id} user`;
   }
 
