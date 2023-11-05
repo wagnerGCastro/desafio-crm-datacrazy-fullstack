@@ -13,6 +13,7 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get('me')
   async userInfo(@Req() req: any) {
     return req.user;
