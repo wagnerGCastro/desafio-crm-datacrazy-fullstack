@@ -12,7 +12,7 @@ const Home = () => {
         <Card>
           <CardHeader title='Olá Admin 🚀'></CardHeader>
           <CardContent>
-            <Typography>Seja Bem Vindo a nossa plataforma de estacionametos de veículos</Typography>
+            <Typography>Seja Bem Vindo a nossa plataforma CRM DataCrazy</Typography>
           </CardContent>
         </Card>
       </Grid>

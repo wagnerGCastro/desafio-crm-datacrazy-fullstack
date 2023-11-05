@@ -20,6 +20,8 @@ import Icon from 'src/@core/components/icon'
 // ** Type Imports
 import { Settings } from 'src/@core/context/settingsContext'
 
+import { useAuth } from 'src/hooks/useAuth'
+
 interface Props {
   settings: Settings
 }
@@ -48,9 +50,9 @@ const UserDropdown = (props: Props) => {
 
   // ** Hooks
   const router = useRouter()
-  const logout = () => {
-    return null
-  }
+  const { logout, user } = useAuth()
+
+
 
   // ** Vars
   const { direction } = settings
@@ -79,6 +81,8 @@ const UserDropdown = (props: Props) => {
       color: 'text.primary'
     }
   }
+
+  const namePerfil = user?.firstName && user?.lastName ? user?.firstName + ' ' + user?.lastName : null;
 
   const handleLogout = () => {
     logout()
@@ -125,7 +129,9 @@ const UserDropdown = (props: Props) => {
               <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
             </Badge>
             <Box sx={{ display: 'flex', ml: 2.5, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 500 }}>John Doe</Typography>
+              <Typography sx={{ fontWeight: 500 }}>
+                {`${namePerfil ? namePerfil : 'John Doe'}`}
+              </Typography>
               <Typography variant='body2'>Admin</Typography>
             </Box>
           </Box>
