@@ -20,7 +20,7 @@ export class UserController {
 
   @Get(':id')
   async show(@Param('id') id: number) {
-    return this.userService.findOne(+id);
+    return this.userService.findOneOrFail(+id);
   }
 
   @Patch(':id')
