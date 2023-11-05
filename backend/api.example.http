@@ -18,7 +18,8 @@ Content-Type: application/json
   "firstName": "Wagner",
   "lastName": "Castro",
   "email": "wagner.castro@teste.com",
-  "password": "@123Alfa"
+  "password": "@123Alfa",
+  "role": "admin"
 }
 
 ###### show
