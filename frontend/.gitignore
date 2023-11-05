@@ -1,3 +1,4 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 ############################
 # OS X
 ############################
@@ -110,35 +111,37 @@ exports
 .vscode
 
 # dependencies
-node_modules
 /node_modules
-_node_modules
-__node_modules
 /.pnp
 .pnp.js
-yarn.lock
-/doc.txt
 
 # testing
 /coverage
 
+# next.js
+/.next/
+/out/
+
 # production
 /build
 /dist
-
 # misc
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.staging
+*.pem
 
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.env
-.env.staging
 
-# txt
-readme.txt
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# outers
+@fake-db
