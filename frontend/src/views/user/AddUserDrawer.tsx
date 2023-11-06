@@ -30,24 +30,28 @@ import Icon from 'src/@core/components/icon'
 import { useDispatch, useSelector } from 'react-redux'
 
 // ** Actions Imports
-import { addUser, handleSetError } from 'src/store/apps/user'
+import { addUser, handleSetError, updateUser } from 'src/store/apps/user'
 
 // ** Types Imports
 import { RootState, AppDispatch } from 'src/store'
 import { UsersType } from 'src/types/apps/userTypes'
 
-interface SidebarAddUserType {
-  open: boolean
-  toggle: () => void
-}
-
 interface UserData {
-  email: string
-  password: string
+  id?: number
+  email?: string
+  password?: string
   role: string
   firstName: string
   lastName: string
 }
+
+interface SidebarAddUserType {
+  open: boolean
+  toggle: () => void
+  datagrid: UserData
+}
+
+
 
 interface StatePassword {
   password: string
@@ -71,7 +75,7 @@ const Header = styled(Box)<BoxProps>(({ theme }) => ({
   justifyContent: 'space-between'
 }))
 
-const schema = yup.object().shape({
+const schemaAddUser = yup.object().shape({
   firstName: yup
     .string()
     .required('Este campo é requerido')
@@ -87,8 +91,28 @@ const schema = yup.object().shape({
   password: yup
     .string()
     .required('Este campo é requerido')
-    .min(3, obj => showErrors('Sobre Nome', obj.value.length, obj.min)),
+    .min(3, obj => showErrors('Senha', obj.value.length, obj.min)),
 })
+
+
+const schemaUpdateUser = yup.object().shape({
+  firstName: yup
+    .string()
+    .required('Este campo é requerido')
+    .min(3, obj => showErrors('Nome', obj.value.length, obj.min)),
+  lastName: yup
+    .string()
+    .required('Este campo é requerido')
+    .min(3, obj => showErrors('Sobre Nome', obj.value.length, obj.min)),
+  email: yup
+    .string()
+    .nullable()
+    .email('E-mail deve ser válido'),
+  password: yup
+    .string()
+    .notRequired()
+})
+
 
 const defaultValues = {
   email: '',
@@ -100,7 +124,7 @@ const defaultValues = {
 
 const SidebarAddUser = (props: SidebarAddUserType) => {
   // ** Props
-  const { open, toggle } = props
+  const { open, toggle, datagrid } = props
 
   // ** State
   const [role, setRole] = useState<string>('client')
@@ -115,14 +139,13 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
   const {
     reset,
     control,
-    setValue,
     setError,
     handleSubmit,
     formState: { errors }
   } = useForm({
-    defaultValues,
+    defaultValues: datagrid ?? defaultValues,
     mode: 'onChange',
-    resolver: yupResolver(schema)
+    resolver: yupResolver(datagrid ? schemaUpdateUser : schemaAddUser)
   })
 
   const handleClickShowPassword = () => {
@@ -130,25 +153,48 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
   }
 
   const onSubmit = (data: UserData) => {
-    if (store.allData.some((u: UsersType) => u.email === data.email)) {
-      store.allData.forEach((u: UsersType) => {
-        if (u.email === data.email) {
-          setError('email', {
-            message: 'Este e-mail já está cadastrado!'
-          })
+
+    dispatch(handleSetError(false))
+
+    if(datagrid) {
+
+      if (store.allData.some((u: UsersType) => data.email !== datagrid.email && u.email === data.email)) {
+        setError('email', {
+          message: 'Este e-mail já está cadastrado!'
+        })
+
+      } else {
+        const  userData = {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          password: data.password ? data.password : undefined!,
+          email: data.email ? data.email : undefined!,
+          id: data.id!,
         }
-      })
+
+        dispatch(updateUser({ ...userData, role }))
+      }
+
     } else {
-      dispatch(addUser({ ...data, role }))
-      reset()
+
+      if (store.allData.some((u: UsersType) => u?.email === data?.email)) {
+        setError('email', {
+          message: 'Este e-mail já está cadastrado!'
+        })
+
+      } else {
+        dispatch(addUser({ ...data, role }))
+        reset()
+      }
+
     }
   }
 
   const handleClose = () => {
     setRole('client')
-    toggle()
     dispatch(handleSetError(false))
     reset()
+    toggle()
   }
 
   return (
@@ -161,7 +207,7 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
       sx={{ '& .MuiDrawer-paper': { width: { xs: 300, sm: 400 } } }}
     >
       <Header>
-        <Typography variant='h6'>Cadastrar Usuário</Typography>
+        <Typography variant='h6'>{datagrid ? 'Atualizar Usuário' :'Cadastrar Usuário'}</Typography>
         <IconButton
           size='small'
           onClick={handleClose}
@@ -171,17 +217,14 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
         </IconButton>
       </Header>
 
-
-
       <Box sx={{ p: theme => theme.spacing(0, 6, 6) , }}>
 
         {store?.errors && <Box  sx={{ mb: 5}}>
           <Alert severity='error'>
             <Box sx={{ mb: 1}}>{store.errors?.error}</Box>
-            <Box>{store.errors?.message}</Box>
+            {store.errors?.message.map((item: string) => (<li style={{fontSize: '13px'}} key={item}>{item}</li>)) }
           </Alert>
         </Box>}
-
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormControl fullWidth sx={{ mb: 4 }}>
@@ -224,9 +267,10 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
             <Controller
               name='email'
               control={control}
-              rules={{ required: true }}
+              rules={{ required: false }}
               render={({ field: { value, onChange } }) => (
                 <TextField
+                  autoComplete='false'
                   type='email'
                   value={value}
                   label='Email'
@@ -261,9 +305,10 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
             <Controller
               name='password'
               control={control}
-              rules={{ required: true }}
+              rules={{ required: false}}
               render={({ field: { value, onChange, onBlur } }) => (
                 <OutlinedInput
+                  autoComplete='false'
                   label='Senha'
                   value={value}
                   onBlur={onBlur}
@@ -296,7 +341,7 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
 
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 3 }}>
             <Button type='submit' variant='contained' sx={{ mr: 3 }}>
-              Cadastrar
+              {datagrid ? 'Atualizar' :'Cadastrar'}
             </Button>
             <Button variant='outlined' color='secondary' onClick={handleClose}>
               Cancelar

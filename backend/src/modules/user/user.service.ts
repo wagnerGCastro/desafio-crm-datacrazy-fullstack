@@ -51,6 +51,8 @@ export class UserService {
       return {
         id: user.id,
         fullName: user.firstName + ' ' + user.lastName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         role: user.role,
         email: user.email,
         createdAt: user.createdAt,
