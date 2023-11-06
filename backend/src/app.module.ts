@@ -29,6 +29,7 @@ dotenv.config({ path: path.join(__dirname, 'config', 'envs', `.env.${process.env
         database: process.env.DB_DATABASE || 'postgres',
         entities: [__dirname + '/**/*.entity{.js,.ts}'],
         synchronize: true,
+        logging: true,
       }),
     }),
     UserModule,
