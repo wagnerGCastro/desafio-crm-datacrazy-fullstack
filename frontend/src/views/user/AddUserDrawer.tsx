@@ -14,6 +14,9 @@ import Typography from '@mui/material/Typography'
 import Box, { BoxProps } from '@mui/material/Box'
 import FormControl from '@mui/material/FormControl'
 import FormHelperText from '@mui/material/FormHelperText'
+import OutlinedInput from '@mui/material/OutlinedInput'
+import InputAdornment from '@mui/material/InputAdornment'
+import Alert from '@mui/material/Alert'
 
 // ** Third Party Imports
 import * as yup from 'yup'
@@ -27,7 +30,7 @@ import Icon from 'src/@core/components/icon'
 import { useDispatch, useSelector } from 'react-redux'
 
 // ** Actions Imports
-import { addUser } from 'src/store/apps/user'
+import { addUser, handleSetError } from 'src/store/apps/user'
 
 // ** Types Imports
 import { RootState, AppDispatch } from 'src/store'
@@ -40,19 +43,22 @@ interface SidebarAddUserType {
 
 interface UserData {
   email: string
-  company: string
-  billing: string
-  country: string
-  contact: number
-  fullName: string
-  username: string
+  password: string
+  role: string
+  firstName: string
+  lastName: string
+}
+
+interface StatePassword {
+  password: string
+  showPassword: boolean
 }
 
 const showErrors = (field: string, valueLen: number, min: number) => {
   if (valueLen === 0) {
-    return `${field} field is required`
+    return `${field} Este campo é requerido`
   } else if (valueLen > 0 && valueLen < min) {
-    return `${field} must be at least ${min} characters`
+    return `${field} deve ter pelo menos ${min} caracteres`
   } else {
     return ''
   }
@@ -66,33 +72,30 @@ const Header = styled(Box)<BoxProps>(({ theme }) => ({
 }))
 
 const schema = yup.object().shape({
-  company: yup.string().required(),
-  billing: yup.string().required(),
-  country: yup.string().required(),
-  email: yup.string().email().required(),
-  contact: yup
-    .number()
-    .typeError('Contact Number field is required')
-    .min(10, obj => showErrors('Contact Number', obj.value.length, obj.min))
-    .required(),
-  fullName: yup
+  firstName: yup
     .string()
-    .min(3, obj => showErrors('First Name', obj.value.length, obj.min))
-    .required(),
-  username: yup
+    .required('Este campo é requerido')
+    .min(3, obj => showErrors('Nome', obj.value.length, obj.min)),
+  lastName: yup
     .string()
-    .min(3, obj => showErrors('Username', obj.value.length, obj.min))
-    .required()
+    .required('Este campo é requerido')
+    .min(3, obj => showErrors('Sobre Nome', obj.value.length, obj.min)),
+  email: yup
+    .string()
+    .email('E-mail deve ser válido')
+    .required('Este campo é requerido'),
+  password: yup
+    .string()
+    .required('Este campo é requerido')
+    .min(3, obj => showErrors('Sobre Nome', obj.value.length, obj.min)),
 })
 
 const defaultValues = {
   email: '',
-  company: '',
-  country: '',
-  billing: '',
-  fullName: '',
-  username: '',
-  contact: Number('')
+  role: '',
+  firstName: '',
+  lastName: '',
+  password: ''
 }
 
 const SidebarAddUser = (props: SidebarAddUserType) => {
@@ -100,8 +103,11 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
   const { open, toggle } = props
 
   // ** State
-  const [plan, setPlan] = useState<string>('basic')
-  const [role, setRole] = useState<string>('subscriber')
+  const [role, setRole] = useState<string>('client')
+  const [values, setValues] = useState<StatePassword>({
+    password: '',
+    showPassword: false
+  })
 
   // ** Hooks
   const dispatch = useDispatch<AppDispatch>()
@@ -118,32 +124,30 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
     mode: 'onChange',
     resolver: yupResolver(schema)
   })
+
+  const handleClickShowPassword = () => {
+    setValues({ ...values, showPassword: !values.showPassword })
+  }
+
   const onSubmit = (data: UserData) => {
-    if (store.allData.some((u: UsersType) => u.email === data.email || u.username === data.username)) {
+    if (store.allData.some((u: UsersType) => u.email === data.email)) {
       store.allData.forEach((u: UsersType) => {
         if (u.email === data.email) {
           setError('email', {
-            message: 'Email already exists!'
-          })
-        }
-        if (u.username === data.username) {
-          setError('username', {
-            message: 'Username already exists!'
+            message: 'Este e-mail já está cadastrado!'
           })
         }
       })
     } else {
-      dispatch(addUser({ ...data, role, currentPlan: plan }))
-      toggle()
+      dispatch(addUser({ ...data, role }))
       reset()
     }
   }
 
   const handleClose = () => {
-    setPlan('basic')
-    setRole('subscriber')
-    setValue('contact', Number(''))
+    setRole('client')
     toggle()
+    dispatch(handleSetError(false))
     reset()
   }
 
@@ -157,7 +161,7 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
       sx={{ '& .MuiDrawer-paper': { width: { xs: 300, sm: 400 } } }}
     >
       <Header>
-        <Typography variant='h6'>Add User</Typography>
+        <Typography variant='h6'>Cadastrar Usuário</Typography>
         <IconButton
           size='small'
           onClick={handleClose}
@@ -166,42 +170,56 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
           <Icon icon='tabler:x' fontSize='1.125rem' />
         </IconButton>
       </Header>
-      <Box sx={{ p: theme => theme.spacing(0, 6, 6) }}>
+
+
+
+      <Box sx={{ p: theme => theme.spacing(0, 6, 6) , }}>
+
+        {store?.errors && <Box  sx={{ mb: 5}}>
+          <Alert severity='error'>
+            <Box sx={{ mb: 1}}>{store.errors?.error}</Box>
+            <Box>{store.errors?.message}</Box>
+          </Alert>
+        </Box>}
+
+
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormControl fullWidth sx={{ mb: 4 }}>
             <Controller
-              name='fullName'
+              name='firstName'
               control={control}
               rules={{ required: true }}
               render={({ field: { value, onChange } }) => (
                 <TextField
                   value={value}
-                  label='Full Name'
+                  label='Nome'
                   onChange={onChange}
-                  placeholder='John Doe'
-                  error={Boolean(errors.fullName)}
+                  placeholder='Digite seu primeiro nome'
+                  error={Boolean(errors.firstName)}
                 />
               )}
             />
-            {errors.fullName && <FormHelperText sx={{ color: 'error.main' }}>{errors.fullName.message}</FormHelperText>}
+            {errors.firstName && <FormHelperText sx={{ color: 'error.main' }}>{errors.firstName.message}</FormHelperText>}
           </FormControl>
+
           <FormControl fullWidth sx={{ mb: 4 }}>
             <Controller
-              name='username'
+              name='lastName'
               control={control}
               rules={{ required: true }}
               render={({ field: { value, onChange } }) => (
                 <TextField
                   value={value}
-                  label='Username'
+                  label='Sobre Nome'
                   onChange={onChange}
-                  placeholder='johndoe'
-                  error={Boolean(errors.username)}
+                  placeholder='Digite seu sobre nome'
+                  error={Boolean(errors.lastName)}
                 />
               )}
             />
-            {errors.username && <FormHelperText sx={{ color: 'error.main' }}>{errors.username.message}</FormHelperText>}
+            {errors.lastName && <FormHelperText sx={{ color: 'error.main' }}>{errors.lastName.message}</FormHelperText>}
           </FormControl>
+
           <FormControl fullWidth sx={{ mb: 4 }}>
             <Controller
               name='email'
@@ -220,134 +238,68 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
             />
             {errors.email && <FormHelperText sx={{ color: 'error.main' }}>{errors.email.message}</FormHelperText>}
           </FormControl>
+
           <FormControl fullWidth sx={{ mb: 4 }}>
-            <Controller
-              name='company'
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { value, onChange } }) => (
-                <TextField
-                  value={value}
-                  label='Company'
-                  onChange={onChange}
-                  placeholder='Company PVT LTD'
-                  error={Boolean(errors.company)}
-                />
-              )}
-            />
-            {errors.company && <FormHelperText sx={{ color: 'error.main' }}>{errors.company.message}</FormHelperText>}
-          </FormControl>
-          <FormControl fullWidth sx={{ mb: 4 }}>
-            <Controller
-              name='country'
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { value, onChange } }) => (
-                <TextField
-                  value={value}
-                  label='Country'
-                  onChange={onChange}
-                  placeholder='Australia'
-                  error={Boolean(errors.country)}
-                />
-              )}
-            />
-            {errors.country && <FormHelperText sx={{ color: 'error.main' }}>{errors.country.message}</FormHelperText>}
-          </FormControl>
-          <FormControl fullWidth sx={{ mb: 4 }}>
-            <Controller
-              name='contact'
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { value, onChange } }) => (
-                <TextField
-                  type='number'
-                  value={value}
-                  label='Contact'
-                  onChange={onChange}
-                  placeholder='(397) 294-5153'
-                  error={Boolean(errors.contact)}
-                />
-              )}
-            />
-            {errors.contact && <FormHelperText sx={{ color: 'error.main' }}>{errors.contact.message}</FormHelperText>}
-          </FormControl>
-          <FormControl fullWidth sx={{ mb: 4 }}>
-            <InputLabel
-              id='validation-billing-select'
-              error={Boolean(errors.billing)}
-              htmlFor='validation-billing-select'
-            >
-              Billing
-            </InputLabel>
-            <Controller
-              name='billing'
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { value, onChange } }) => (
-                <Select
-                  value={value}
-                  label='Billing'
-                  onChange={onChange}
-                  error={Boolean(errors.billing)}
-                  labelId='validation-billing-select'
-                  aria-describedby='validation-billing-select'
-                >
-                  <MenuItem value=''>Billing</MenuItem>
-                  <MenuItem value='Auto Debit'>Auto Debit</MenuItem>
-                  <MenuItem value='Manual - Cash'>Manual - Cash</MenuItem>
-                  <MenuItem value='Manual - Paypal'>Manual - Paypal</MenuItem>
-                  <MenuItem value='Manual - Credit Card'>Manual - Credit Card</MenuItem>
-                </Select>
-              )}
-            />
-            {errors.billing && (
-              <FormHelperText sx={{ color: 'error.main' }} id='validation-billing-select'>
-                This field is required
-              </FormHelperText>
-            )}
-          </FormControl>
-          <FormControl fullWidth sx={{ mb: 4 }}>
-            <InputLabel id='role-select'>Select Role</InputLabel>
+            <InputLabel id='role-select'>Tipo de usuário</InputLabel>
             <Select
               fullWidth
               value={role}
               id='select-role'
-              label='Select Role'
+              label='Tipo de usuário'
               labelId='role-select'
               onChange={e => setRole(e.target.value)}
-              inputProps={{ placeholder: 'Select Role' }}
+              inputProps={{ placeholder: 'Selecione o tipo de usuário' }}
             >
               <MenuItem value='admin'>Admin</MenuItem>
-              <MenuItem value='author'>Author</MenuItem>
+              <MenuItem value='client'>Cliente</MenuItem>
               <MenuItem value='editor'>Editor</MenuItem>
-              <MenuItem value='maintainer'>Maintainer</MenuItem>
-              <MenuItem value='subscriber'>Subscriber</MenuItem>
             </Select>
           </FormControl>
-          <FormControl fullWidth sx={{ mb: 6 }}>
-            <InputLabel id='plan-select'>Select Plan</InputLabel>
-            <Select
-              fullWidth
-              value={plan}
-              id='select-plan'
-              label='Select Plan'
-              labelId='plan-select'
-              onChange={e => setPlan(e.target.value)}
-              inputProps={{ placeholder: 'Select Plan' }}
-            >
-              <MenuItem value='basic'>Basic</MenuItem>
-              <MenuItem value='company'>Company</MenuItem>
-              <MenuItem value='enterprise'>Enterprise</MenuItem>
-              <MenuItem value='team'>Team</MenuItem>
-            </Select>
+
+          <FormControl fullWidth sx={{ mb: 1.5 }}>
+            <InputLabel htmlFor='auth-login-password'>Senha</InputLabel>
+            <Controller
+              name='password'
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { value, onChange, onBlur } }) => (
+                <OutlinedInput
+                  label='Senha'
+                  value={value}
+                  onBlur={onBlur}
+                  id='auth-login-password'
+                  onChange={onChange}
+                  type={values.showPassword ? 'text' : 'password'}
+                  endAdornment={
+                    <InputAdornment position='end'>
+                      <IconButton
+                        edge='end'
+                        onClick={handleClickShowPassword}
+                        onMouseDown={e => e.preventDefault()}
+                        aria-label='toggle password visibility'
+                      >
+                        <Icon icon={values.showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              )}
+            />
+
+            {errors.password && (
+              <FormHelperText sx={{ color: 'error.main' }} id=''>
+                {errors.password.message}
+              </FormHelperText>
+            )}
           </FormControl>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+
+
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 3 }}>
             <Button type='submit' variant='contained' sx={{ mr: 3 }}>
-              Submit
+              Cadastrar
             </Button>
             <Button variant='outlined' color='secondary' onClick={handleClose}>
-              Cancel
+              Cancelar
             </Button>
           </Box>
         </form>
