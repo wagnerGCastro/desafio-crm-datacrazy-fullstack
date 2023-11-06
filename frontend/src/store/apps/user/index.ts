@@ -32,9 +32,17 @@ export const fetchData = createAsyncThunk('appUsers/fetchData', async (params: D
 export const addUser = createAsyncThunk(
   'appUsers/addUser',
   async (data: { [key: string]: number | string }, { getState, dispatch }: Redux) => {
-    const response = await axios.post('/apps/users/add-user', {
-      data
-    })
+    let response = { data: null }
+
+    try {
+      response = await axios.post('/user', {
+        ...data
+      })
+      toast.success(`Usuário foi criado com sucesso`)
+    } catch (error: any) {
+      dispatch(handleSetError(error?.response?.data ? error?.response?.data : false))
+    }
+
     dispatch(fetchData(getState().user.params))
 
     return response.data
@@ -60,13 +68,19 @@ export const deleteUser = createAsyncThunk(
   }
 )
 
+// ** Set Errors User
+export const handleSetError = createAsyncThunk('appUsers/errors', async (data: any) => {
+  return data
+})
+
 export const appUsersSlice = createSlice({
   name: 'appUsers',
   initialState: {
     data: [],
     total: 1,
     params: {},
-    allData: []
+    allData: [],
+    errors: false as any
   },
   reducers: {},
   extraReducers: builder => {
@@ -76,7 +90,12 @@ export const appUsersSlice = createSlice({
       state.params = action.payload.params
       state.allData = action.payload.allData
     })
+    builder.addCase(handleSetError.fulfilled, (state, action) => {
+      state.errors = action.payload
+    })
   }
 })
+
+// export const { handleSetError } = appUsersSlice.actions
 
 export default appUsersSlice.reducer
