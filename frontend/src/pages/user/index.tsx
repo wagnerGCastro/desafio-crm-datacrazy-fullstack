@@ -113,9 +113,7 @@ const RowOptions = ({ id, data }: { id: number | string , data: UsersType}) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [editUserOpen, setEditUserOpen] = useState<boolean>(false)
 
-
   const rowOptionsOpen = Boolean(anchorEl)
-
 
   const toggleAddUserDrawer = () => setEditUserOpen(!editUserOpen)
 
@@ -135,7 +133,6 @@ const RowOptions = ({ id, data }: { id: number | string , data: UsersType}) => {
     handleRowOptionsClose()
     setEditUserOpen(true)
   }
-
 
   return (
     <>
@@ -310,7 +307,6 @@ const UserList = () => {
   const handleRoleChange = useCallback((e: SelectChangeEvent) => {
     setRole(e.target.value)
   }, [])
-
 
   const handleOnChangeRange = useCallback((dates: any) => {
     const [start, end] = dates

@@ -1,4 +1,4 @@
-## Teste de Tecnologia – FullStac
+## Teste de Tecnologia – FullStack
 
 Criar uma API REST (backend) e frontend para gerenciar cadastro de usuários.
 
@@ -32,7 +32,7 @@ Criar telas de cadastro e exibições do usuário:
 - Criar uma tela para exibir os usuários cadastrados
 - Um modal para inserção, atualização e deleção do usuário
 - Na tela de listagem deve conter uma caixa para pesquisa por nome.
-- Na tela de listagem deve conter um filtro por data de criação, do menor para o maior, domaior para o menor e por período. Ex: 25/10/2023 - 30/30/2023
+- Na tela de listagem deve conter um filtro por data de criação, do menor para o maior, do maior para o menor e por período. Ex: 25/10/2023 - 30/30/2023
 
 #### Objetivo::
 
