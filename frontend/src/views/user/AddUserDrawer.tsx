@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // ** MUI Imports
 import Drawer from '@mui/material/Drawer'
@@ -48,7 +48,7 @@ interface UserData {
 interface SidebarAddUserType {
   open: boolean
   toggle: () => void
-  datagrid: UserData
+  datagrid?: UserData
 }
 
 
@@ -197,6 +197,10 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
     toggle()
   }
 
+  useEffect(() => {
+    dispatch(handleSetError(false))
+  }, [dispatch])
+
   return (
     <Drawer
       open={open}
@@ -222,7 +226,12 @@ const SidebarAddUser = (props: SidebarAddUserType) => {
         {store?.errors && <Box  sx={{ mb: 5}}>
           <Alert severity='error'>
             <Box sx={{ mb: 1}}>{store.errors?.error}</Box>
-            {store.errors?.message.map((item: string) => (<li style={{fontSize: '13px'}} key={item}>{item}</li>)) }
+            {
+
+              Array.isArray(store.errors?.message) && store.errors?.message.length > 0
+                ? store.errors?.message?.map((item: string) => (<li style={{fontSize: '13px'}} key={item}>{item}</li>))
+                : store.errors?.message
+            }
           </Alert>
         </Box>}
 

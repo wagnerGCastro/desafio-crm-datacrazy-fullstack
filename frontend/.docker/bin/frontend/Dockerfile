@@ -1,0 +1,12 @@
+FROM node:18.17.0-alpine3.17
+
+RUN apk --update add --no-cache bash curl
+
+# Essentials
+RUN apk add -U tzdata
+ENV TZ=America/Sao_Paulo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+WORKDIR /var/www
+EXPOSE 3092
+ENV HOST 0.0.0.0

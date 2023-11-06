@@ -28,6 +28,23 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  ### FRONTEND ##############################################
+  frontend:
+    build:
+      context: ./frontend/.docker/bin/frontend
+      dockerfile: Dockerfile
+    entrypoint: sh -c "npm install --loglevel=error && npm run dev"
+    env_file:
+      - ./frontend/.env.development
+    volumes:
+      - ./frontend:/var/www
+    ports:
+      - "${APP_PORT:-3092}:3092"
+    networks:
+      - frontend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   ### POSTGRES ##############################################
   postgres:
     image: postgres:10.5
