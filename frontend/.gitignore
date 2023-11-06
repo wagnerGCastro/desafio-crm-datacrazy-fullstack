@@ -144,4 +144,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 # outers
-@fake-db
+src/@fake-db

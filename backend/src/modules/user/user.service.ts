@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Between, Raw, ILike } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,8 +16,57 @@ export class UserService {
 
   async findAll() {
     return await this.userRepository.find({
-      select: ['id', 'firstName', 'lastName', 'email'],
+      select: ['id', 'firstName', 'lastName', 'email', 'role', 'createdAt', 'updatedAt'],
     });
+  }
+
+  async findCustom({ role, createdAtInit, createdAtEnd, sortOrder, q }) {
+    let conditional: any = '';
+
+    if (createdAtInit && createdAtEnd) {
+      conditional = { createdAt: Between(createdAtInit, createdAtEnd) };
+    } else if (createdAtInit && !createdAtEnd) {
+      conditional = { createdAt: Raw((createdAt) => `${createdAt} >= '${createdAtInit}'`) };
+    } else if (!createdAtInit && createdAtEnd) {
+      conditional = { createdAt: Raw((createdAt) => `${createdAt} <= '${createdAtEnd}'`) };
+    }
+
+    if (role) {
+      conditional = { ...conditional, role };
+    }
+
+    if (q) {
+      conditional = { ...conditional, firstName: ILike(`%${q}%`) };
+    }
+
+    const users = await this.userRepository.find({
+      select: ['id', 'firstName', 'lastName', 'email', 'role', 'createdAt', 'updatedAt'],
+      where: conditional,
+      order: {
+        createdAt: sortOrder ? sortOrder : 'DESC',
+      },
+    });
+
+    const filteredData = users.map((user) => {
+      return {
+        id: user.id,
+        fullName: user.firstName + ' ' + user.lastName,
+        role: user.role,
+        email: user.email,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        status: 'active',
+        avatar: '',
+        avatarColor: 'primary',
+      };
+    });
+
+    return {
+      allData: users,
+      users: filteredData,
+      params: { role, createdAtInit, createdAtEnd, sortOrder, q },
+      total: filteredData.length,
+    };
   }
 
   async findOneOrFail({ id, email }: { id?: number; email?: string }) {
