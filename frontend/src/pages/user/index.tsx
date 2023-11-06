@@ -105,14 +105,19 @@ const renderClient = (row: UsersType) => {
   }
 }
 
-const RowOptions = ({ id }: { id: number | string }) => {
+const RowOptions = ({ id, data }: { id: number | string , data: UsersType}) => {
   // ** Hooks
   const dispatch = useDispatch<AppDispatch>()
 
   // ** State
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [editUserOpen, setEditUserOpen] = useState<boolean>(false)
+
 
   const rowOptionsOpen = Boolean(anchorEl)
+
+
+  const toggleAddUserDrawer = () => setEditUserOpen(!editUserOpen)
 
   const handleRowOptionsClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -125,6 +130,12 @@ const RowOptions = ({ id }: { id: number | string }) => {
     dispatch(deleteUser(id))
     handleRowOptionsClose()
   }
+
+  const handleEdit = () => {
+    handleRowOptionsClose()
+    setEditUserOpen(true)
+  }
+
 
   return (
     <>
@@ -146,7 +157,7 @@ const RowOptions = ({ id }: { id: number | string }) => {
         }}
         PaperProps={{ style: { minWidth: '8rem' } }}
       >
-        <MenuItem onClick={handleRowOptionsClose} sx={{ '& svg': { mr: 2 } }}>
+        <MenuItem onClick={() => handleEdit()} sx={{ '& svg': { mr: 2 } }}>
           <Icon icon='tabler:edit' fontSize={20} />
           Editar
         </MenuItem>
@@ -155,6 +166,8 @@ const RowOptions = ({ id }: { id: number | string }) => {
           Deletar
         </MenuItem>
       </Menu>
+
+      <AddUserDrawer open={editUserOpen} toggle={toggleAddUserDrawer} datagrid={data}/>
     </>
   )
 }
@@ -259,7 +272,7 @@ const columns: GridColDef[] = [
     sortable: false,
     field: 'actions',
     headerName: 'Ações',
-    renderCell: ({ row }: CellType) => <RowOptions id={row.id} />
+    renderCell: ({ row }: CellType) => <RowOptions id={row.id} data={row} />
   }
 ]
 
