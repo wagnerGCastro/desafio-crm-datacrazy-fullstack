@@ -3,13 +3,14 @@ import { Dispatch } from 'redux'
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** Axios Imports
-import axios from 'axios'
+// import axios from 'axios'
+import { axiosInstance as axios } from 'src/configs/axios'
 
 interface DataParams {
   q: string
   role: string
-  status: string
-  currentPlan: string
+  createdAtInit: any
+  createdAtEnd: any
 }
 
 interface Redux {
@@ -19,7 +20,7 @@ interface Redux {
 
 // ** Fetch Users
 export const fetchData = createAsyncThunk('appUsers/fetchData', async (params: DataParams) => {
-  const response = await axios.get('/apps/users/list', {
+  const response = await axios.get('/user/find-custom', {
     params
   })
 

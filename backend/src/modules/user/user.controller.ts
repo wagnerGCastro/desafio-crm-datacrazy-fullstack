@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Patch,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,6 +29,11 @@ export class UserController {
   @Get()
   async index() {
     return this.userService.findAll();
+  }
+
+  @Get('find-custom')
+  async findCustom(@Query() { role, createdAtInit, createdAtEnd, sortOrder, q }) {
+    return this.userService.findCustom({ role, createdAtInit, createdAtEnd, sortOrder, q });
   }
 
   @Get(':id')

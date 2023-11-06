@@ -14,6 +14,13 @@ const navigation = (): VerticalNavItemsType => {
       subject: 'acl-page',
       icon: 'tabler:shield',
       title: 'Access Control'
+    },
+    {
+      title: 'User',
+      icon: 'tabler:user',
+      path: '/user',
+      action: 'read',
+      subject: 'acl-page'
     }
   ]
 }
