@@ -16,6 +16,16 @@ import authConfig from 'src/configs/auth'
 // ** Types
 import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
 
+import {
+  storageGetToken,
+  storageRemoveToken,
+  storageSetToken,
+  storageRemoveRefreshToken,
+  stroageRemoveUserData,
+  stroageSetUserData
+} from 'src/services/localStorageService'
+
+
 // ** Defaults
 const defaultProvider: AuthValuesType = {
   user: null,
@@ -42,7 +52,7 @@ const AuthProvider = ({ children }: Props) => {
 
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
-      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
+      const storedToken =  storageGetToken()!
 
       if (storedToken) {
         setLoading(true)
@@ -54,14 +64,14 @@ const AuthProvider = ({ children }: Props) => {
           })
           .then(async response => {
             const userMe: any = response?.data.user
-            window.localStorage.setItem('userData', JSON.stringify(userMe))
+            stroageSetUserData(JSON.stringify(userMe))
             setUser(userMe)
             setLoading(false)
           })
           .catch(() => {
-            localStorage.removeItem('userData')
-            localStorage.removeItem('refreshToken')
-            localStorage.removeItem('accessToken')
+            stroageRemoveUserData()
+            storageRemoveRefreshToken()
+            storageRemoveToken()
             setUser(null)
             setLoading(false)
             if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
@@ -81,11 +91,11 @@ const AuthProvider = ({ children }: Props) => {
     axios
       .post(authConfig.loginEndpoint, params)
       .then(async response => {
-        params.rememberMe ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.token) : null
+        params.rememberMe ? storageSetToken(response.data.token) : null
         const returnUrl = router.query.returnUrl
         const userToken: any = decode(response?.data?.token)
         setUser(userToken?.user)
-        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(userToken?.user)) : null
+        params.rememberMe ? stroageSetUserData(JSON.stringify(userToken?.user)) : null
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
         router.replace(redirectURL as string)
       })
@@ -99,8 +109,8 @@ const AuthProvider = ({ children }: Props) => {
 
   const handleLogout = () => {
     setUser(null)
-    window.localStorage.removeItem('userData')
-    window.localStorage.removeItem(authConfig.storageTokenKeyName)
+    stroageRemoveUserData()
+    storageRemoveToken()
     router.push('/login')
   }
 

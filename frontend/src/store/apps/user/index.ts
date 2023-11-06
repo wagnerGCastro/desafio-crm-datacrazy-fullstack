@@ -1,6 +1,7 @@
 // ** Redux Imports
 import { Dispatch } from 'redux'
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import toast from 'react-hot-toast'
 
 // ** Axios Imports
 // import axios from 'axios'
@@ -44,9 +45,15 @@ export const addUser = createAsyncThunk(
 export const deleteUser = createAsyncThunk(
   'appUsers/deleteUser',
   async (id: number | string, { getState, dispatch }: Redux) => {
-    const response = await axios.delete('/apps/users/delete', {
-      data: id
-    })
+    let response = { data: null }
+
+    try {
+      response = await axios.delete(`/user/${id}`)
+      toast.success(`Usuário id=${id} foi deletado com sucesso`)
+    } catch (error: any) {
+      toast.error(`Houve, erro ao deletar usuário id=${id}! \n ${error?.message}`)
+    }
+
     dispatch(fetchData(getState().user.params))
 
     return response.data

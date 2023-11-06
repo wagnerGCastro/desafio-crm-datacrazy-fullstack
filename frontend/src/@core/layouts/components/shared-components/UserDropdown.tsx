@@ -132,7 +132,7 @@ const UserDropdown = (props: Props) => {
               <Typography sx={{ fontWeight: 500 }}>
                 {`${namePerfil ? namePerfil : 'John Doe'}`}
               </Typography>
-              <Typography variant='body2'>Admin</Typography>
+              <Typography variant='body2'>{user?.role ?? 'Admin'}</Typography>
             </Box>
           </Box>
         </Box>

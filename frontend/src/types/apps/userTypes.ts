@@ -15,6 +15,7 @@ export type UsersType = {
   username: string
   currentPlan: string
   avatarColor?: ThemeColor
+  createdAt: string
 }
 
 export type ProjectListDataType = {
