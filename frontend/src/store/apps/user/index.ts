@@ -49,6 +49,29 @@ export const addUser = createAsyncThunk(
   }
 )
 
+// ** Update User
+export const updateUser = createAsyncThunk(
+  'appUsers/updateUser',
+  async (data: { [key: string]: number | string }, { getState, dispatch }: Redux) => {
+    let response = { data: null }
+    const id = data.id
+    delete data.id
+
+    try {
+      response = await axios.patch(`/user/${id}`, {
+        ...data
+      })
+      toast.success(`Usuário id=${id} foi atualizado com sucesso`)
+    } catch (error: any) {
+      dispatch(handleSetError(error?.response?.data ? error?.response?.data : false))
+    }
+
+    dispatch(fetchData(getState().user.params))
+
+    return response.data
+  }
+)
+
 // ** Delete User
 export const deleteUser = createAsyncThunk(
   'appUsers/deleteUser',
@@ -95,7 +118,5 @@ export const appUsersSlice = createSlice({
     })
   }
 })
-
-// export const { handleSetError } = appUsersSlice.actions
 
 export default appUsersSlice.reducer
