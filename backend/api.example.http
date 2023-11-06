@@ -26,7 +26,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo0L
 ###### index
 GET http://localhost:3071/api/user
 
-###### USER - create
+###### find-custom
+GET http://localhost:3071/api/user/find-custom/?role=&createdAtInit=&createdAtEnd=2023-11-05T11:21:46.931Z
+
+
+###### create
 POST http://localhost:3071/api/user
 Content-Type: application/json
 

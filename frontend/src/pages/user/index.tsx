@@ -3,7 +3,7 @@ import { useState, useEffect, MouseEvent, useCallback } from 'react'
 
 // ** Next Imports
 import Link from 'next/link'
-import { GetStaticProps, InferGetStaticPropsType } from 'next/types'
+
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -211,7 +211,7 @@ const columns: GridColDef[] = [
             <Icon icon={userRoleObj[row?.role]?.icon} />
           </CustomAvatar>
           <Typography noWrap sx={{ color: 'text.secondary', textTransform: 'capitalize' }}>
-            {row.role}
+            {row.role === 'client' ? 'Cliente' : row.role}
           </Typography>
         </Box>
       )
@@ -329,6 +329,7 @@ const UserList = () => {
                     <MenuItem value=''>Selecione o tipo de usuário</MenuItem>
                     <MenuItem value='admin'>Admin</MenuItem>
                     <MenuItem value='client'>Clinte</MenuItem>
+                    <MenuItem value='editor'>Editor</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>

@@ -11,7 +11,7 @@ import {
 
 import { hashSync } from 'bcrypt';
 
-export type RoleEnum = 'admin' | 'client';
+export type RoleEnum = 'admin' | 'client' | 'editor';
 
 @Entity({ name: 'users' })
 export class UserEntity {
@@ -30,7 +30,7 @@ export class UserEntity {
   @Column()
   password: string;
 
-  @Column({ name: 'role', type: 'enum', enum: ['admin', 'client'], default: null })
+  @Column({ name: 'role', type: 'enum', enum: ['admin', 'client', 'editor'], default: null })
   role: string;
 
   @CreateDateColumn({ name: 'created_at' })
